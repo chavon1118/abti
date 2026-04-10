@@ -219,7 +219,8 @@ function cpct(v){return Math.round(((Math.max(-8,Math.min(8,v))+8)/16)*100);}
 
 function imgEl(k){
   const a=A[k];
-  return `<img src="${a.img}" alt="${a.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.outerHTML='<span class=\\"fb\\">${a.fb}</span>'">`;
+  // Render image and a hidden emoji fallback; on image load error hide the <img> and reveal the .fb span
+  return `<div style="width:100%;height:100%"><img src="${a.img}" alt="${a.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none';var s=this.parentNode.querySelector('.fb');if(s)s.style.display='inline-block'"><span class="fb" style="display:none">${a.fb}</span></div>`;
 }
 
 function chrome(){
@@ -262,7 +263,7 @@ function intro(app){
     ${ORDER.map(k=>`<div class="tc" data-g="${A[k].g}">
       <div class="tc-icon">${imgEl(k)}</div>
       <div class="tc-code">${k}</div>
-      <div class="tc-name">${A[k].name}</div>
+      <div class="tc-name">${A[k].sub}</div>
     </div>`).join('')}
   </div>`;
 }
