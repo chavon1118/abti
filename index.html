@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Animal Are You?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8f7f4;
+  --white: #ffffff;
+  --text: #2d2d2d;
+  --muted: #6b6b6b;
+  --dim: #9a9a9a;
+  --border: #e4e2dc;
+  --border-h: #c8c5bc;
+  --r: 12px;
+  --rl: 20px;
+  --green: #4a9b7f;
+  --green-d: #3d8a6e;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Nunito Sans',sans-serif;font-size:16px;line-height:1.6;min-height:100vh}
+#pb-wrap{position:fixed;top:0;left:0;right:0;height:4px;background:var(--border);z-index:100}
+#pb-fill{height:100%;background:linear-gradient(90deg,#4a9b7f,#7dbfa8);transition:width .5s ease;width:0%}
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2rem;background:var(--white);border-bottom:1px solid var(--border)}
+.logo{font-family:'Lora',serif;font-size:18px;font-weight:600;letter-spacing:-.02em}
+.logo span{color:var(--green)}
+#nav-ct{font-size:13px;color:var(--dim);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+#app{max-width:760px;margin:0 auto;padding:0 1.5rem 5rem}
+
+/* INTRO */
+.intro{text-align:center;padding:5rem 1rem 3rem;animation:fu .5s ease both}
+.eyebrow{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin-bottom:1.25rem;background:rgba(74,155,127,.08);padding:5px 14px;border-radius:999px}
+.intro h1{font-family:'Lora',serif;font-size:clamp(32px,6vw,52px);font-weight:600;line-height:1.15;letter-spacing:-.02em;margin-bottom:1.25rem}
+.intro-sub{font-size:17px;color:var(--muted);max-width:520px;margin:0 auto 2.5rem;line-height:1.7;font-weight:300}
+.meta-row{display:flex;align-items:center;justify-content:center;gap:2rem;margin-bottom:2.5rem;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);font-weight:600}
+.meta-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.start-btn{display:inline-flex;align-items:center;gap:10px;background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:1rem 2.5rem;font-family:'Nunito Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:background .15s,transform .1s;letter-spacing:.01em}
+.start-btn:hover{background:var(--green-d)}
+.start-btn:active{transform:scale(.98)}
+.grid-label{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);text-align:center;margin:4rem 0 1.5rem}
+.type-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.tc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 10px;text-align:center;transition:border-color .15s,box-shadow .15s}
+.tc:hover{border-color:var(--border-h);box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.tc[data-g="analyst"]{border-top:3px solid #7b68b5}
+.tc[data-g="diplomat"]{border-top:3px solid #4a9b7f}
+.tc[data-g="sentinel"]{border-top:3px solid #4a7fb5}
+.tc[data-g="explorer"]{border-top:3px solid #c4873a}
+.tc-icon{width:48px;height:48px;margin:0 auto 10px;border-radius:50%;background:var(--bg);border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.tc-icon img{width:100%;height:100%;object-fit:cover}
+.tc-icon .fb{font-size:22px;line-height:1}
+.tc-code{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--text);letter-spacing:.03em}
+.tc-name{font-size:11px;color:var(--dim);margin-top:2px;font-weight:600}
+
+/* QUIZ */
+.quiz-wrap{padding-top:3.5rem;animation:fu .35s ease both}
+.qcard{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:3rem 2.5rem 2.5rem;margin-bottom:1.5rem;box-shadow:0 2px 20px rgba(0,0,0,.04)}
+.q-ax{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:1.5rem;display:flex;align-items:center;gap:8px}
+.q-ax::before{content:'';display:inline-block;width:20px;height:2px;background:var(--green);border-radius:999px}
+.q-stmt{font-family:'Lora',serif;font-size:clamp(18px,3.5vw,24px);font-weight:400;line-height:1.45;color:var(--text);margin-bottom:2.5rem;letter-spacing:-.01em}
+.scale-wrap{display:flex;flex-direction:column;align-items:center;gap:1rem}
+.scale-labels{display:flex;justify-content:space-between;width:100%;max-width:480px}
+.slabel{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.bubbles{display:flex;align-items:center;justify-content:center;gap:10px}
+.bb{border:2px solid var(--border);border-radius:50%;cursor:pointer;background:var(--white);transition:border-color .15s,background .15s,transform .1s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bb:hover{transform:scale(1.12)}
+.bb:active{transform:scale(.95)}
+.bb[data-i="0"]{width:44px;height:44px}
+.bb[data-i="1"]{width:36px;height:36px}
+.bb[data-i="2"]{width:28px;height:28px}
+.bb[data-i="3"]{width:36px;height:36px}
+.bb[data-i="4"]{width:44px;height:44px}
+.bb[data-i="0"]:hover,.bb[data-i="0"].on{border-color:#b85c52}
+.bb[data-i="1"]:hover,.bb[data-i="1"].on{border-color:#c4867a}
+.bb[data-i="2"]:hover,.bb[data-i="2"].on{border-color:#b8b4aa}
+.bb[data-i="3"]:hover,.bb[data-i="3"].on{border-color:#7dbfa8}
+.bb[data-i="4"]:hover,.bb[data-i="4"].on{border-color:#4a9b7f}
+.bb[data-i="0"].on{background:#b85c52}
+.bb[data-i="1"].on{background:#c4867a}
+.bb[data-i="2"].on{background:#b8b4aa}
+.bb[data-i="3"].on{background:#7dbfa8}
+.bb[data-i="4"].on{background:#4a9b7f}
+.scale-hint{font-size:12px;color:var(--dim);font-style:italic;min-height:18px}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:2rem}
+.nbtn{padding:.75rem 1.75rem;background:transparent;border:1.5px solid var(--border);border-radius:var(--r);font-family:'Nunito Sans',sans-serif;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;transition:border-color .12s,color .12s,background .12s;letter-spacing:.02em}
+.nbtn:hover:not(:disabled){border-color:var(--border-h);color:var(--text);background:var(--white)}
+.nbtn:disabled{opacity:.3;cursor:not-allowed}
+.nbtn.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.nbtn.primary:hover:not(:disabled){background:var(--green-d);border-color:var(--green-d);color:#fff}
+.nbtn.primary:disabled{background:var(--bg);color:var(--dim);border-color:var(--border)}
+
+/* RESULT */
+.result-wrap{animation:fu .45s ease both;padding-top:2rem}
+.rhero{border-radius:var(--rl);overflow:hidden;margin-bottom:2rem;box-shadow:0 4px 32px rgba(0,0,0,.08)}
+.rband{padding:3rem 2.5rem 2rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
+.rico{width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.4);overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.15)}
+.rico img{width:100%;height:100%;object-fit:cover}
+.rico .fb{font-size:56px;line-height:1}
+.rtext .rlabel{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:.4rem}
+.rtext .rcode{font-family:'Lora',serif;font-size:clamp(40px,8vw,60px);font-weight:600;color:#fff;line-height:1;letter-spacing:.06em;margin-bottom:.3rem}
+.rtext .raname{font-family:'Lora',serif;font-size:clamp(20px,4vw,28px);font-weight:400;color:rgba(255,255,255,.9);font-style:italic;margin-bottom:.4rem}
+.rtext .rsub{font-size:14px;color:rgba(255,255,255,.65);font-weight:600;letter-spacing:.04em}
+.rpills{padding:1rem 2.5rem;display:flex;flex-wrap:wrap;gap:8px;background:rgba(0,0,0,.12)}
+.rpill{font-size:12px;padding:5px 14px;border-radius:999px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-weight:600;letter-spacing:.04em;border:1px solid rgba(255,255,255,.2)}
+.rbody{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:1.5rem;align-items:start}
+.rcard{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;box-shadow:0 2px 16px rgba(0,0,0,.04)}
+.sec-title{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:1rem}
+.rdesc{font-size:15px;color:var(--muted);line-height:1.8;font-weight:300}
+.rfact{font-size:14px;color:var(--dim);line-height:1.7;font-style:italic;padding-top:1.25rem;margin-top:1.25rem;border-top:1px solid var(--border);font-weight:300}
+.spec-list{display:flex;flex-direction:column;gap:1.25rem}
+.spec-head{display:flex;justify-content:space-between;margin-bottom:6px}
+.ss{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.ss.on{color:var(--text)}
+.spec-track{height:8px;background:var(--bg);border-radius:999px;position:relative;border:1px solid var(--border);overflow:visible}
+.spec-fill{position:absolute;top:0;bottom:0;border-radius:999px;transition:left .8s cubic-bezier(.34,1.2,.64,1),width .8s cubic-bezier(.34,1.2,.64,1)}
+.spec-marker{position:absolute;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;border:3px solid var(--white);box-shadow:0 1px 4px rgba(0,0,0,.2);transition:left .8s cubic-bezier(.34,1.2,.64,1)}
+.spec-pct{font-size:12px;font-weight:700;color:var(--muted);text-align:center;margin-top:4px}
+.rbtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){
+  .rbody{grid-template-columns:1fr}
+  .rband{flex-direction:column;align-items:flex-start;gap:1.25rem}
+  .rpills{justify-content:center}
+  .rbtns{justify-content:center}
+  .bubbles{gap:7px}
+  .bb[data-i="0"],.bb[data-i="4"]{width:40px;height:40px}
+  .bb[data-i="1"],.bb[data-i="3"]{width:32px;height:32px}
+  .bb[data-i="2"]{width:26px;height:26px}
+  .type-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<div id="pb-wrap"><div id="pb-fill"></div></div>
+<nav class="topnav">
+  <span class="logo">animal<span>types</span></span>
+  <span id="nav-ct"></span>
+</nav>
+<div id="app"></div>
+<script>
+/*
+  ADD YOUR ICONS
+  Create an "icons" folder next to index.html and add:
+    pig.png  crab.png  hamster.png  goose.png
+    seal.png  cat.png  kangaroo.png  owl.png
+    lizard.png  flamingo.png  cheetah.png  hippo.png
+    snake.png  sealion.png  raccoon.png  goldenretriever.png
+  Square images look best. PNG/JPG/SVG/WebP all work.
+*/
+
+const GC = {
+  analyst:  {band:'#7b68b5',mid:'#a394cc'},
+  diplomat: {band:'#4a9b7f',mid:'#6db89e'},
+  sentinel: {band:'#4a7fb5',mid:'#6d9ccc'},
+  explorer: {band:'#c4873a',mid:'#d4a466'}
+};
+
+const A = {
+  SLOP:{img:'icons/pig.png',fb:'🐷',name:'Pig',sub:'The Chaotic Comfort Gremlin',g:'explorer',pills:['snack-driven','no regrets','surprisingly wise'],desc:'You are a pig — one of the most intelligent animals on earth who also fully commits to rolling in mud for fun. You have zero shame about your pleasures and maximum personality. Life is short; eat the thing, nap afterward, repeat. People find you either hilarious or exhausting. They\'re both right.',fact:'Fun fact: Pigs are cleaner than dogs — they designate a bathroom corner away from where they eat. You are disgusting in spirit only.'},
+  CLAW:{img:'icons/crab.png',fb:'🦀',name:'Crab',sub:'The Defensive Little Menace',g:'sentinel',pills:['moves sideways','pinchy when scared','secretly soft inside'],desc:'You are a crab. Hard exterior, suspicious of everyone, will absolutely pinch first and ask questions never. Underneath that shell though? Tender. Genuinely tender. You have strong opinions about personal space and a secret emotional depth that only your three trusted people will ever see.',fact:'Fun fact: Crabs can regenerate lost claws. You do the emotional equivalent of this after every argument.'},
+  FUZZ:{img:'icons/hamster.png',fb:'🐹',name:'Hamster',sub:'The Tiny Unhinged Menace',g:'explorer',pills:['runs at midnight','hoards everything','will bite without warning'],desc:'You are a hamster. Soft and adorable from a distance, completely unhinged up close. You store resources — snacks, info, feelings — in cheeks you didn\'t know you had. You have limitless energy that surfaces exclusively at 3am. Your lifestyle baffles the people who love you, but they love you anyway.',fact:'Fun fact: Hamsters can run up to 8 miles a night on a wheel going nowhere. You relate to this on a spiritual level.'},
+  HONK:{img:'icons/goose.png',fb:'🪿',name:'Goose',sub:'The Aggressive Extrovert',g:'explorer',pills:['no fear whatsoever','extremely loud','chaotic good'],desc:'You are a goose. You have never experienced self-doubt in your life. You walk into every room like you own it, you honk your opinions loudly, and if someone crosses you, you chase them across a parking lot with zero hesitation. People respect you and also slightly fear you. This is correct.',fact:'Fun fact: Geese mate for life and will absolutely attack anyone who threatens their partner. Loyalty, but make it feral.'},
+  BOOP:{img:'icons/seal.png',fb:'🦭',name:'Seal',sub:'The Wholesome Disaster',g:'diplomat',pills:['flopping with purpose','emotionally available','makes everything cute'],desc:'You are a seal. Clumsy on land, magnificent in water — meaning you thrive in your element and absolutely eat it in everyone else\'s. You are enthusiastic to a fault, deeply affectionate, and your laugh is genuinely contagious. You make a scene everywhere you go and somehow it\'s always endearing.',fact:'Fun fact: Seals slap the water with their flippers to communicate excitement. You do this metaphorically in every group chat.'},
+  SMUG:{img:'icons/cat.png',fb:'🐱',name:'Cat',sub:'The Mysterious Unbothered One',g:'analyst',pills:['judging silently','nap champion','on their own terms'],desc:'You are a cat. Ancient civilizations worshipped you and you feel that was the correct call. You give affection exclusively on your schedule. You observe everything, say little, and still somehow run the household. Your resting expression communicates mild disdain and it works for you.',fact:'Fun fact: Cats spend 70% of their lives sleeping and the other 30% judging. You consider this a lifestyle, not a flaw.'},
+  YEET:{img:'icons/kangaroo.png',fb:'🦘',name:'Kangaroo',sub:'The Impulsive Adventurer',g:'explorer',pills:['leaps before looking','surprisingly strong','always moving'],desc:'You are a kangaroo. You move fast, think later, and your legs are your best asset. You leap into situations that would make a normal person pause for weeks of deliberation. You carry everything important with you and you are built for terrain that would destroy lesser creatures.',fact:'Fun fact: Kangaroos can\'t walk backwards. Neither can you, emotionally speaking. Forward only.'},
+  LURK:{img:'icons/owl.png',fb:'🦉',name:'Owl',sub:'The Watching Sage',g:'analyst',pills:['sees everything','up at 3am again','cryptic on purpose'],desc:'You are an owl. Silent, rotating, watching. You process before you speak and when you do speak, it lands. You see in the dark — literally and metaphorically. People find you wise and slightly unsettling. You\'ve been called an old soul since age seven. It\'s true.',fact:'Fun fact: Owls can rotate their heads 270 degrees. You use this to see every angle of a situation before responding to a single text.'},
+  MLEM:{img:'icons/lizard.png',fb:'🦎',name:'Lizard',sub:'The Ancient Chill Entity',g:'sentinel',pills:['thermoregulating vibes','very still very aware','predates all drama'],desc:'You are a lizard. You\'ve been doing this since before the dinosaurs and you\'re still here, so clearly the approach works. You are deliberate, economical, and deeply unbothered by things that send others spiraling. You sun yourself when needed, vanish when threatened, and have genuinely alien-tier patience.',fact:'Fun fact: Some lizards can detach their own tail to escape danger and grow it back later. You have detached from drama and regrown your peace.'},
+  SNOB:{img:'icons/flamingo.png',fb:'🦩',name:'Flamingo',sub:'The High-Maintenance Icon',g:'diplomat',pills:['standing on one leg','extremely pink','born fabulous'],desc:'You are a flamingo. You are technically pink because of what you eat, which means your entire aesthetic is a lifestyle choice made flesh. You stand on one leg because you can. You travel in groups but you\'re always the one everyone photographs. Standards: high. Exceptions: none.',fact:'Fun fact: Flamingos are only pink because of the shrimp they eat. You became who you are through very deliberate consumption of beauty.'},
+  ZOOM:{img:'icons/cheetah.png',fb:'🐆',name:'Cheetah',sub:'The Speed Demon with No Brakes',g:'explorer',pills:['fastest in the room','needs a nap after','zero chill'],desc:'You are a cheetah. You are the fastest land animal and you use this to make decisions before other people have finished understanding the question. You are brilliant in short sprints. You run hot, crash hard, and recharge faster than anyone expects. Every decision is made at full speed.',fact:'Fun fact: Cheetahs need 30 minutes to rest after a sprint or they overheat. You also need 30 minutes after every major decision.'},
+  PLOP:{img:'icons/hippo.png',fb:'🦛',name:'Hippo',sub:'The Unbothered Tank',g:'sentinel',pills:['deceptively dangerous','loves the water','naps in public'],desc:'You are a hippo. You appear chill. You ARE chill — until you\'re not, and then it\'s genuinely everyone else\'s problem. You are among the most powerful creatures in your ecosystem and you know it, but you don\'t need to prove it. You just float there. Knowing.',fact:'Fun fact: Hippos secrete a natural sunscreen that also works as an antibiotic. You come with your own protection installed.'},
+  HISS:{img:'icons/snake.png',fb:'🐍',name:'Snake',sub:'The Misunderstood Loner',g:'analyst',pills:['chronically misread','cold-blooded (iconic)','very flexible'],desc:'You are a snake. People assume the worst and they are usually wrong. You are precise, purposeful, and deeply focused. You shed your skin regularly because you are always outgrowing your previous self. You do not need warmth from others; you find your own.',fact:'Fun fact: Snakes smell with their tongues. You sense the vibe of a room before anyone has said a word.'},
+  FLOP:{img:'icons/sealion.png',fb:'🦁',name:'Sea Lion',sub:'The Dramatic Loveable Mess',g:'diplomat',pills:['performs constantly','needs applause','magnificent at flopping'],desc:'You are a sea lion. You are loud, theatrical, and somehow always the centre of attention even when nothing is happening. You flop dramatically onto surfaces. You bark for acknowledgment. And yet — deeply loveable. People are endlessly entertained by you and you know it. You feed on this.',fact:'Fun fact: Sea lions are one of the few animals that can clap to a beat. Of course you can.'},
+  GRUB:{img:'icons/raccoon.png',fb:'🦝',name:'Raccoon',sub:'The Dumpster CEO',g:'analyst',pills:['chaotic genius','feral resourceful','wears a mask'],desc:'You are a raccoon. Clever, resourceful, and absolutely unhinged in the most productive way. You thrive in environments that would break others. You solve problems using whatever\'s available, you work the night shift, and you have a face that says I have a plan and I may be lying simultaneously.',fact:'Fun fact: Raccoons wash their food before eating it. Chaotic, but principled. That\'s you.'},
+  WOOF:{img:'icons/goldenretriever.png',fb:'🐶',name:'Golden Retriever',sub:'The Aggressively Wholesome One',g:'diplomat',pills:['loves everyone','treat-motivated','emotionally available'],desc:'You are a golden retriever. You approach every single day like it might be the best one yet, and because you\'re in it, it usually is. You have no enemies. Your laugh is contagious. People feel measurably better after talking to you, and this is not an accident — it\'s just who you are.',fact:'Fun fact: Golden retrievers hold objects gently in their mouths without damaging them. You do this with people\'s feelings.'}
+};
+
+const ORDER = ['SLOP','CLAW','FUZZ','HONK','BOOP','SMUG','YEET','LURK','MLEM','SNOB','ZOOM','PLOP','HISS','FLOP','GRUB','WOOF'];
+
+const QS = [
+  {s:'When plans fall apart, you see it as an exciting opportunity to improvise.',ax:'CI',d:1},
+  {s:'You process your feelings best by talking them out with others, not sitting quietly alone.',ax:'QF',d:1},
+  {s:'You feel most energised after spending time in a large group of people.',ax:'NH',d:1},
+  {s:'You usually make big decisions quickly, trusting your gut over lengthy research.',ax:'CI',d:1},
+  {s:'Rules are really more like suggestions — they apply until they stop making sense.',ax:'RF',d:1},
+  {s:'You find social situations draining and need alone time to recharge afterward.',ax:'NH',d:-1},
+  {s:'When something goes wrong, your first instinct is to tell someone about it immediately.',ax:'QF',d:1},
+  {s:'You tend to arrive early and find it stressful when other people are late.',ax:'CI',d:-1},
+  {s:'You would rather face conflict head-on than let it quietly fester over time.',ax:'RF',d:1},
+  {s:'You tend to be one of the loudest or most talkative people in the room.',ax:'NH',d:1},
+  {s:'You tend to keep your personal problems to yourself until you have already resolved them.',ax:'QF',d:-1},
+  {s:'You believe that asking for forgiveness later is usually easier than asking for permission now.',ax:'RF',d:1},
+  {s:'You frequently stay up far later than you intended, chasing interesting ideas or activities.',ax:'CI',d:1},
+  {s:'Meeting a lot of new people at a party sounds more fun than exhausting.',ax:'NH',d:1},
+  {s:'You have a backup plan for your backup plan — being unprepared makes you anxious.',ax:'CI',d:-1},
+  {s:'You are more likely to bend a rule than to report someone who broke one.',ax:'RF',d:1}
+];
+
+const AX = {
+  CI:{a:'Chaotic',b:'Ironclad'},
+  NH:{a:'Performer',b:'Hermit'},
+  RF:{a:'Feral',b:'Principled'},
+  QF:{a:'Loud',b:'Quiet'}
+};
+
+const HINTS = ['Strongly disagree','Disagree','Neutral / not sure','Agree','Strongly agree'];
+
+let S = {screen:'intro',qi:0,sel:null,hist:[],sc:{CI:0,NH:0,RF:0,QF:0}};
+
+function getType(){
+  const {CI,NH,RF,QF}=S.sc;
+  return ORDER[(CI>=0?0:1)*8+(NH>=0?0:1)*4+(RF>=0?0:1)*2+(QF>=0?0:1)];
+}
+
+function cpct(v){return Math.round(((Math.max(-8,Math.min(8,v))+8)/16)*100);}
+
+function imgEl(k){
+  const a=A[k];
+  return `<img src="${a.img}" alt="${a.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.outerHTML='<span class=\\"fb\\">${a.fb}</span>'">`;
+}
+
+function chrome(){
+  const pb=document.getElementById('pb-fill');
+  const ct=document.getElementById('nav-ct');
+  if(S.screen==='quiz'){
+    if(pb)pb.style.width=Math.round((S.qi/QS.length)*100)+'%';
+    if(ct)ct.textContent=(S.qi+1)+' of '+QS.length;
+  } else if(S.screen==='result'){
+    if(pb)pb.style.width='100%';
+    if(ct)ct.textContent='';
+  } else {
+    if(pb)pb.style.width='0%';
+    if(ct)ct.textContent='';
+  }
+}
+
+function render(){
+  const app=document.getElementById('app');
+  if(S.screen==='intro')intro(app);
+  else if(S.screen==='quiz')quiz(app);
+  else result(app);
+  chrome();
+}
+
+function intro(app){
+  app.innerHTML=`<div class="intro">
+    <span class="eyebrow">Free personality test</span>
+    <h1>What animal are you, really?</h1>
+    <p class="intro-sub">16 types. 4 personality dimensions. Zero scientific credentials. Answer honestly — or don't, we're not a real test.</p>
+    <div class="meta-row">
+      <span class="meta-item"><span class="meta-dot"></span>16 questions</span>
+      <span class="meta-item"><span class="meta-dot"></span>~3 minutes</span>
+      <span class="meta-item"><span class="meta-dot"></span>16 animal types</span>
+    </div>
+    <button class="start-btn" onclick="startQ()">Start the test &rarr;</button>
+  </div>
+  <p class="grid-label">All 16 animal types</p>
+  <div class="type-grid">
+    ${ORDER.map(k=>`<div class="tc" data-g="${A[k].g}">
+      <div class="tc-icon">${imgEl(k)}</div>
+      <div class="tc-code">${k}</div>
+      <div class="tc-name">${A[k].name}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function quiz(app){
+  const q=QS[S.qi];
+  const ax=AX[q.ax];
+  app.innerHTML=`<div class="quiz-wrap">
+    <div class="qcard">
+      <div class="q-ax">${ax.a} &harr; ${ax.b}</div>
+      <p class="q-stmt">&ldquo;${q.s}&rdquo;</p>
+      <div class="scale-wrap">
+        <div class="scale-labels">
+          <span class="slabel">Disagree</span>
+          <span class="slabel">Agree</span>
+        </div>
+        <div class="bubbles">
+          ${[0,1,2,3,4].map(i=>`<button class="bb${S.sel===i?' on':''}" data-i="${i}" onclick="pick(${i})" title="${HINTS[i]}"></button>`).join('')}
+        </div>
+        <p class="scale-hint" id="sh">${S.sel!==null?HINTS[S.sel]:'Select how much you agree or disagree'}</p>
+      </div>
+    </div>
+    <div class="qnav">
+      <button class="nbtn" onclick="prevQ()" ${S.qi===0?'disabled':''}>&#8592; Back</button>
+      <button class="nbtn primary" onclick="nextQ()" ${S.sel===null?'disabled':''}>${S.qi<QS.length-1?'Next &rarr;':'See my result &rarr;'}</button>
+    </div>
+  </div>`;
+}
+
+function result(app){
+  const code=getType();
+  const a=A[code];
+  const gc=GC[a.g];
+  const {CI,NH,RF,QF}=S.sc;
+
+  function bar(ax,sc){
+    const m=AX[ax];
+    const pct=cpct(sc);
+    const left=sc>=0;
+    const fl=left?50:pct;
+    const fw=left?(pct-50):(50-pct);
+    const abspct=Math.abs(Math.round((pct-50)*2));
+    return `<div>
+      <div class="spec-head">
+        <span class="ss${left?' on':''}">${m.a}</span>
+        <span class="ss${!left?' on':''}">${m.b}</span>
+      </div>
+      <div class="spec-track">
+        <div class="spec-fill" style="left:${Math.min(fl,50)}%;width:${fw}%;background:${gc.mid}"></div>
+        <div class="spec-marker" style="left:${pct}%;background:${gc.band}"></div>
+      </div>
+      <div class="spec-pct">${left?m.a:m.b} &mdash; ${abspct}%</div>
+    </div>`;
+  }
+
+  app.innerHTML=`<div class="result-wrap">
+    <div class="rhero">
+      <div class="rband" style="background:${gc.band}">
+        <div class="rico">${imgEl(code)}</div>
+        <div class="rtext">
+          <div class="rlabel">Your animal type</div>
+          <div class="rcode">${code}</div>
+          <div class="raname">${a.name}</div>
+          <div class="rsub">${a.sub}</div>
+        </div>
+      </div>
+      <div class="rpills" style="background:${gc.band}">
+        ${a.pills.map(p=>`<span class="rpill">${p}</span>`).join('')}
+      </div>
+    </div>
+    <div class="rbody">
+      <div>
+        <div class="rcard">
+          <p class="sec-title">About your type</p>
+          <p class="rdesc">${a.desc}</p>
+          <p class="rfact">${a.fact}</p>
+        </div>
+        <div class="rcard" style="margin-top:1rem">
+          <div class="rbtns">
+            <button class="nbtn" onclick="restart()">Retake the test</button>
+            <button class="nbtn" onclick="backToIntro()">Explore all types</button>
+          </div>
+        </div>
+      </div>
+      <div class="rcard">
+        <p class="sec-title">Your personality axes</p>
+        <div class="spec-list">
+          ${bar('CI',CI)}${bar('NH',NH)}${bar('RF',RF)}${bar('QF',QF)}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function startQ(){S={screen:'quiz',qi:0,sel:null,hist:[],sc:{CI:0,NH:0,RF:0,QF:0}};render();}
+function backToIntro(){S.screen='intro';render();}
+
+function pick(i){
+  S.sel=i;
+  const h=document.getElementById('sh');
+  if(h)h.textContent=HINTS[i];
+  document.querySelectorAll('.bb').forEach((b,idx)=>b.classList.toggle('on',idx===i));
+}
+
+function nextQ(){
+  if(S.sel===null)return;
+  const q=QS[S.qi];
+  const raw=S.sel-2;
+  const v=raw*q.d;
+  S.hist.push({qi:S.qi,sel:S.sel,ax:q.ax,v});
+  S.sc[q.ax]+=v;
+  if(S.qi<QS.length-1){S.qi++;S.sel=null;}
+  else{S.screen='result';}
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function prevQ(){
+  if(S.qi===0){S.screen='intro';render();return;}
+  const last=S.hist.pop();
+  S.sc[last.ax]-=last.v;
+  S.qi--;S.sel=last.sel;
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restart(){startQ();}
+render();
+</script>
+</body>
+</html>
