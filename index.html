@@ -301,21 +301,31 @@ function result(app){
 
   function bar(ax,sc){
     const m=AX[ax];
-    const pct=cpct(sc);
-    const left=sc>=0;
-    const fl=left?50:pct;
-    const fw=left?(pct-50):(50-pct);
-    const abspct=Math.abs(Math.round((pct-50)*2));
+    const pct = cpct(sc); // 0..100 where 50 is neutral
+    // invert pct so positive scores (pct>50) map toward the left side visually
+    const marker = 100 - pct; // marker position in percent from left
+    const left = sc >= 0; // non-negative means left side (m.a) is active
+    let fl, fw;
+    if(left){
+      // fill from marker (left of center) to center (50%)
+      fl = Math.min(marker,50);
+      fw = 50 - fl;
+    } else {
+      // fill from center (50%) to marker (right of center)
+      fl = 50;
+      fw = Math.max(marker - 50, 0);
+    }
+    const abspct = Math.round(Math.abs(pct - 50) * 2);
     return `<div>
       <div class="spec-head">
-        <span class="ss${left?' on':''}">${m.a}</span>
-        <span class="ss${!left?' on':''}">${m.b}</span>
+        <span class="ss${left ? ' on' : ''}">${m.a}</span>
+        <span class="ss${!left ? ' on' : ''}">${m.b}</span>
       </div>
       <div class="spec-track">
-        <div class="spec-fill" style="left:${Math.min(fl,50)}%;width:${fw}%;background:${gc.mid}"></div>
-        <div class="spec-marker" style="left:${pct}%;background:${gc.band}"></div>
+        <div class="spec-fill" style="left:${fl}%;width:${fw}%;background:${gc.mid}"></div>
+        <div class="spec-marker" style="left:${marker}%;background:${gc.band}"></div>
       </div>
-      <div class="spec-pct">${left?m.a:m.b} &mdash; ${abspct}%</div>
+      <div class="spec-pct">${left ? m.a : m.b} &mdash; ${abspct}%</div>
     </div>`;
   }
 
