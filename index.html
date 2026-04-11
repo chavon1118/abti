@@ -180,6 +180,26 @@ const A = {
 
 const ORDER = ['SLOP','CLAW','FUZZ','HONK','BOOP','SMUG','YEET','LURK','MLEM','SNOB','ZOOM','PLOP','HISS','FLOP','GRUB','WOOF'];
 
+// New: personality type vectors (values in -1..1 range roughly)
+const TYPE_VECTOR = {
+  SLOP: {CI:-0.7, NH:-0.2, RF:-0.7, QF:-0.2},
+  CLAW: {CI:0.3,  NH:0.7,  RF:0.2,  QF:0.5},
+  FUZZ: {CI:-0.6, NH:-0.6, RF:-0.3, QF:-0.6},
+  HONK: {CI:-0.5, NH:-1.0, RF:-0.7, QF:-1.0},
+  BOOP: {CI:-0.3, NH:-0.8, RF:0.2,  QF:-0.6},
+  SMUG: {CI:0.6,  NH:0.7,  RF:0.4,  QF:0.8},
+  YEET: {CI:-1.0, NH:-0.6, RF:-0.9, QF:-0.7},
+  LURK: {CI:0.4,  NH:1.0,  RF:0.2,  QF:1.0},
+  MLEM: {CI:0.2,  NH:0.6,  RF:0.3,  QF:0.7},
+  SNOB: {CI:0.3,  NH:-0.7, RF:0.6,  QF:-0.4},
+  ZOOM: {CI:-1.0, NH:-0.5, RF:-0.4, QF:-0.8},
+  PLOP: {CI:0.8,  NH:0.3,  RF:0.2,  QF:0.6},
+  HISS: {CI:0.6,  NH:0.8,  RF:-0.5, QF:0.9},
+  FLOP: {CI:-0.7, NH:-0.9, RF:-0.2, QF:-0.9},
+  GRUB: {CI:-0.4, NH:0.4,  RF:-0.7, QF:0.2},
+  WOOF: {CI:-0.2, NH:-1.0, RF:0.3,  QF:-0.8}
+};
+
 const QS = [
   {s:'When plans fall apart, you see it as an exciting opportunity to improvise.',ax:'CI',d:1},
   {s:'You process your feelings best by talking them out with others, not sitting quietly alone.',ax:'QF',d:1},
@@ -196,7 +216,13 @@ const QS = [
   {s:'You frequently stay up far later than you intended, chasing interesting ideas or activities.',ax:'CI',d:1},
   {s:'Meeting a lot of new people at a party sounds more fun than exhausting.',ax:'NH',d:1},
   {s:'You have a backup plan for your backup plan — being unprepared makes you anxious.',ax:'CI',d:-1},
-  {s:'You are more likely to bend a rule than to report someone who broke one.',ax:'RF',d:1}
+  {s:'You are more likely to bend a rule than to report someone who broke one.',ax:'RF',d:1},
+  { s:'You prefer following established rules even if they feel slightly inefficient.', ax:'RF', d:-1 },
+{ s:'You feel uncomfortable bending rules, even when it would be harmless.', ax:'RF', d:-1 },
+{ s:'You think structure and consistency are more important than flexibility.', ax:'RF', d:-1 },
+{ s:'You often prefer observing a group rather than participating in it.', ax:'NH', d:-1 },
+{ s:'You usually avoid being the center of attention even in casual settings.', ax:'NH', d:-1 },
+{ s:'You prefer to think through your emotions privately before sharing them.', ax:'QF', d:-1 },
 ];
 
 const AX = {
@@ -206,13 +232,54 @@ const AX = {
   QF:{a:'Loud',b:'Quiet'}
 };
 
+function computeAxisMax(qs){
+  const max = {CI:0, NH:0, RF:0, QF:0};
+  for(const q of qs) max[q.ax] += Math.abs(q.d) * 2;
+  return max;
+}
+
+const AXIS_MAX = computeAxisMax(QS);
+
+function normalize(v, ax){ return Math.max(-1, Math.min(1, v / AXIS_MAX[ax])); }
+
+// cpct: raw score → 0–100 where 0=fully first trait (Chaotic/Performer/Feral/Loud), 100=fully second trait
+function cpct(v, ax){
+  const m = AXIS_MAX[ax];
+  const c = Math.max(-m, Math.min(m, v));
+  return Math.round(((c + m) / (2 * m)) * 100);
+}
+
 const HINTS = ['Strongly disagree','Disagree','Neutral / not sure','Agree','Strongly agree'];
 
-let S = {screen:'intro',qi:0,sel:null,hist:[],sc:{CI:0,NH:0,RF:0,QF:0}};
+let S = {screen:'intro',qi:0,sel:null,hist:[],sc:{CI:0,NH:0,RF:0,QF:0},qs:QS};
 
 function getType(){
-  const {CI,NH,RF,QF}=S.sc;
-  return ORDER[(CI>=0?0:1)*8+(NH>=0?0:1)*4+(RF>=0?0:1)*2+(QF>=0?0:1)];
+  const user = {
+    CI: normalize(S.sc.CI, 'CI'),
+    NH: normalize(S.sc.NH, 'NH'),
+    RF: normalize(S.sc.RF, 'RF'),
+    QF: normalize(S.sc.QF, 'QF')
+  };
+
+  let bestType = null;
+  let bestScore = Infinity;
+
+  for(const type in TYPE_VECTOR){
+    const t = TYPE_VECTOR[type];
+
+    const dist =
+      Math.pow(user.CI - t.CI, 2) +
+      Math.pow(user.NH - t.NH, 2) +
+      Math.pow(user.RF - t.RF, 2) +
+      Math.pow(user.QF - t.QF, 2);
+
+    if(dist < bestScore){
+      bestScore = dist;
+      bestType = type;
+    }
+  }
+
+  return bestType;
 }
 
 function cpct(v){return Math.round(((Math.max(-8,Math.min(8,v))+8)/16)*100);}
@@ -227,8 +294,8 @@ function chrome(){
   const pb=document.getElementById('pb-fill');
   const ct=document.getElementById('nav-ct');
   if(S.screen==='quiz'){
-    if(pb)pb.style.width=Math.round((S.qi/QS.length)*100)+'%';
-    if(ct)ct.textContent=(S.qi+1)+' of '+QS.length;
+    if(pb)pb.style.width=Math.round((S.qi/S.qs.length)*100)+'%';
+    if(ct)ct.textContent=(S.qi+1)+' of '+S.qs.length;
   } else if(S.screen==='result'){
     if(pb)pb.style.width='100%';
     if(ct)ct.textContent='';
@@ -252,7 +319,7 @@ function intro(app){
     <h1>What animal are you, really?</h1>
     <p class="intro-sub">16 types. 4 personality dimensions. Zero scientific credentials. Answer honestly — or don't, we're not a real test.</p>
     <div class="meta-row">
-      <span class="meta-item"><span class="meta-dot"></span>16 questions</span>
+      <span class="meta-item"><span class="meta-dot"></span>22 questions</span>
       <span class="meta-item"><span class="meta-dot"></span>~3 minutes</span>
       <span class="meta-item"><span class="meta-dot"></span>16 animal types</span>
     </div>
@@ -269,7 +336,7 @@ function intro(app){
 }
 
 function quiz(app){
-  const q=QS[S.qi];
+  const q=S.qs[S.qi];
   const ax=AX[q.ax];
   app.innerHTML=`<div class="quiz-wrap">
     <div class="qcard">
@@ -288,7 +355,7 @@ function quiz(app){
     </div>
     <div class="qnav">
       <button class="nbtn" onclick="prevQ()" ${S.qi===0?'disabled':''}>&#8592; Back</button>
-      <button class="nbtn primary" onclick="nextQ()" ${S.sel===null?'disabled':''}>${S.qi<QS.length-1?'Next &rarr;':'See my result &rarr;'}</button>
+      <button class="nbtn primary" onclick="nextQ()" ${S.sel===null?'disabled':''}>${S.qi<S.qs.length-1?'Next &rarr;':'See my result &rarr;'}</button>
     </div>
   </div>`;
 }
@@ -301,21 +368,12 @@ function result(app){
 
   function bar(ax,sc){
     const m=AX[ax];
-    const pct = cpct(sc); // 0..100 where 50 is neutral
-    // invert pct so positive scores (pct>50) map toward the left side visually
-    const marker = 100 - pct; // marker position in percent from left
-    const left = sc >= 0; // non-negative means left side (m.a) is active
-    let fl, fw;
-    if(left){
-      // fill from marker (left of center) to center (50%)
-      fl = Math.min(marker,50);
-      fw = 50 - fl;
-    } else {
-      // fill from center (50%) to marker (right of center)
-      fl = 50;
-      fw = Math.max(marker - 50, 0);
-    }
-    const abspct = Math.round(Math.abs(pct - 50) * 2);
+    // pct: 0=fully first trait (Chaotic etc), 50=neutral, 100=fully second trait (Ironclad etc)
+    const pct = cpct(sc, ax);
+    const left = sc <= 0; // negative (or zero) score = first trait is dominant = left side
+    const fl = left ? pct : 50;
+    const fw = Math.abs(pct - 50);
+    const abspct = Math.round(fw * 2);
     return `<div>
       <div class="spec-head">
         <span class="ss${left ? ' on' : ''}">${m.a}</span>
@@ -323,7 +381,7 @@ function result(app){
       </div>
       <div class="spec-track">
         <div class="spec-fill" style="left:${fl}%;width:${fw}%;background:${gc.mid}"></div>
-        <div class="spec-marker" style="left:${marker}%;background:${gc.band}"></div>
+        <div class="spec-marker" style="left:${pct}%;background:${gc.band}"></div>
       </div>
       <div class="spec-pct">${left ? m.a : m.b} &mdash; ${abspct}%</div>
     </div>`;
@@ -368,7 +426,10 @@ function result(app){
   </div>`;
 }
 
-function startQ(){S={screen:'quiz',qi:0,sel:null,hist:[],sc:{CI:0,NH:0,RF:0,QF:0}};render();}
+function startQ(){
+  const shuffled = QS.slice().sort(() => Math.random() - 0.5);
+  S={screen:'quiz',qi:0,sel:null,hist:[],sc:{CI:0,NH:0,RF:0,QF:0},qs:shuffled};render();
+}
 function backToIntro(){S.screen='intro';render();}
 
 function pick(i){
@@ -376,18 +437,19 @@ function pick(i){
   const h=document.getElementById('sh');
   if(h)h.textContent=HINTS[i];
   document.querySelectorAll('.bb').forEach((b,idx)=>b.classList.toggle('on',idx===i));
-  // Re-render so the Next button's disabled attribute updates
   render();
 }
 
 function nextQ(){
   if(S.sel===null)return;
-  const q=QS[S.qi];
+  const q=S.qs[S.qi];
   const raw=S.sel-2;
-  const v=raw*q.d;
+  // negate d: questions are written so "agree" = first trait (Chaotic/Performer/Feral/Loud)
+  // but first traits are negative in our scoring, so we flip the sign here
+  const v=raw * -q.d;
   S.hist.push({qi:S.qi,sel:S.sel,ax:q.ax,v});
   S.sc[q.ax]+=v;
-  if(S.qi<QS.length-1){S.qi++;S.sel=null;}
+  if(S.qi<S.qs.length-1){S.qi++;S.sel=null;}
   else{S.screen='result';}
   render();
   window.scrollTo({top:0,behavior:'smooth'});
